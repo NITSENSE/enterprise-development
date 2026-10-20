@@ -9,20 +9,20 @@ namespace TransportCompany.Domain.Data;
 public static class TransportTestData
 {
     /// <summary>
-    /// Справочник моделей транспортных средств
+    /// Справочник моделей транспортных средств (характеристики кузова)
     /// </summary>
     public static List<VehicleModel> VehicleModels { get; } =
     [
-        new() { Id = 1,  Name = "ГАЗель Next",     BodyType = BodyType.Tent,         BodyVolume = 10.5 },
-        new() { Id = 2,  Name = "КАМАЗ 5490",      BodyType = BodyType.Tent,         BodyVolume = 60.0 },
-        new() { Id = 3,  Name = "Volvo FH",        BodyType = BodyType.Refrigerator, BodyVolume = 80.0 },
-        new() { Id = 4,  Name = "Scania R450",     BodyType = BodyType.Container,    BodyVolume = 75.0 },
-        new() { Id = 5,  Name = "MAN TGX",         BodyType = BodyType.Flatbed,      BodyVolume = 70.0 },
-        new() { Id = 6,  Name = "Mercedes Actros", BodyType = BodyType.Refrigerator, BodyVolume = 82.0 },
-        new() { Id = 7,  Name = "Isuzu Elf",       BodyType = BodyType.Tent,         BodyVolume = 20.0 },
-        new() { Id = 8,  Name = "Ford Transit",    BodyType = BodyType.Tent,         BodyVolume = 12.0 },
-        new() { Id = 9,  Name = "Renault Premium", BodyType = BodyType.Tank,         BodyVolume = 55.0 },
-        new() { Id = 10, Name = "DAF XF",          BodyType = BodyType.Container,    BodyVolume = 78.0 }
+        new() { Id = 1,  BodyType = BodyType.Tent,         BodyVolume = 10.5 },
+        new() { Id = 2,  BodyType = BodyType.Tent,         BodyVolume = 60.0 },
+        new() { Id = 3,  BodyType = BodyType.Refrigerator, BodyVolume = 80.0 },
+        new() { Id = 4,  BodyType = BodyType.Container,    BodyVolume = 75.0 },
+        new() { Id = 5,  BodyType = BodyType.Flatbed,      BodyVolume = 70.0 },
+        new() { Id = 6,  BodyType = BodyType.Refrigerator, BodyVolume = 82.0 },
+        new() { Id = 7,  BodyType = BodyType.Tent,         BodyVolume = 20.0 },
+        new() { Id = 8,  BodyType = BodyType.Tent,         BodyVolume = 12.0 },
+        new() { Id = 9,  BodyType = BodyType.Tank,         BodyVolume = 55.0 },
+        new() { Id = 10, BodyType = BodyType.Container,    BodyVolume = 78.0 }
     ];
 
     /// <summary>

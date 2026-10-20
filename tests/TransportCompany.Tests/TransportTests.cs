@@ -1,5 +1,4 @@
 ﻿using TransportCompany.Domain.Data;
-using TransportCompany.Domain.Shared.Enums;
 
 namespace TransportCompany.Tests;
 
@@ -9,23 +8,19 @@ public class TransportTests
     /// 1. Вывести информацию обо всех клиентах, заказывавших перевозку
     /// на транспорте указанной модели, упорядочить по ФИО
     /// </summary>
-    [Fact]
-    public void GetClientsByVehicleModel()
+    [Theory]
+    [InlineData(1, new[] { "ИП Иванов И.И.", "ООО «МебельГрад»", "ООО «Ромашка»"})] //тент 10.5
+    [InlineData(2, new[] { "ООО «Василёк»" })] // тент 60
+    [InlineData(3, new[] { "АО «ТехноСервис»", "ИП Сидоров С.С.", "ООО «МебельГрад»" })] //реф 80
+    [InlineData(9, new[] { "ИП Иванов И.И.", "ООО «Ромашка»" })] // цистерна 55
+    [InlineData(999, new string[0])]
+    public void GetClientsByVehicleModel(int targetModelId, string[] expected)
     {
-        const string modelName = "Volvo FH";
-
-        var expected = new[]
-        {
-            "АО «ТехноСервис»",
-            "ИП Сидоров С.С.",
-            "ООО «МебельГрад»"
-        };
-
         var result = TransportTestData.Trips
-            .Where(trip => trip.Vehicle.Model.Name == modelName)
+            .Where(trip => trip.Vehicle.Model.Id == targetModelId)
             .Select(trip => trip.Client)
             .DistinctBy(client => client.Id)
-            .OrderBy(client => client.Name)
+            .OrderBy(client => client.Name, StringComparer.Ordinal)
             .Select(client => client.Name)
             .ToArray();
 
@@ -49,7 +44,7 @@ public class TransportTests
             .Where(trip => trip.IsActive)
             .Select(trip => trip.Vehicle)
             .DistinctBy(vehicle => vehicle.Id)
-            .OrderBy(vehicle => vehicle.LicensePlate)
+            .OrderBy(vehicle => vehicle.LicensePlate, StringComparer.Ordinal)
             .Select(vehicle => vehicle.LicensePlate)
             .ToArray();
 
@@ -74,7 +69,7 @@ public class TransportTests
         var result = TransportTestData.Trips
             .GroupBy(trip => trip.Driver)
             .OrderByDescending(group => group.Count())
-            .ThenBy(group => group.Key.PassportNumber)
+            .ThenBy(group => group.Key.PassportNumber, StringComparer.Ordinal)
             .Take(5)
             .Select(group => (
                 PassportNumber: group.Key.PassportNumber,

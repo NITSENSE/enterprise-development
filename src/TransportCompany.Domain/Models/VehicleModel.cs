@@ -13,11 +13,6 @@ public class VehicleModel
     public int Id { get; set; }
 
     /// <summary>
-    /// Название модели
-    /// </summary>
-    public required string Name { get; set; }
-
-    /// <summary>
     /// Тип кузова
     /// </summary>
     public BodyType BodyType { get; set; }
