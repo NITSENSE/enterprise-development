@@ -40,7 +40,7 @@ public class Trip
     /// <summary>
     /// Дата отправления
     /// </summary>
-    public DateTime DepartureDate { get; set; }
+    public DateOnly DepartureDate { get; set; }
 
     /// <summary>
     /// Вес груза в тоннах

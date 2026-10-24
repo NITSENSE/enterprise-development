@@ -13,6 +13,26 @@ public class VehicleModel
     public int Id { get; set; }
 
     /// <summary>
+    /// Марка
+    /// </summary>
+    public required string Brand { get; set; }
+
+    /// <summary>
+    /// Название модели
+    /// </summary>
+    public required string Name { get; set; }
+
+    /// <summary>
+    /// Грузоподъёмность в тоннах
+    /// </summary>
+    public double Capacity { get; set; }
+
+    /// <summary>
+    /// Требуемая категория водительских прав
+    /// </summary>
+    public LicenseCategory RequiredLicenseCategory { get; set; }
+
+    /// <summary>
     /// Тип кузова
     /// </summary>
     public BodyType BodyType { get; set; }

@@ -16,16 +16,6 @@ public class Vehicle
     public required string LicensePlate { get; set; }
 
     /// <summary>
-    /// Марка
-    /// </summary>
-    public required string Brand { get; set; }
-
-    /// <summary>
-    /// Грузоподъёмность в тоннах
-    /// </summary>
-    public double Capacity { get; set; }
-
-    /// <summary>
     /// Модель транспортного средства
     /// </summary>
     public required VehicleModel Model { get; set; }

@@ -1,4 +1,6 @@
-﻿namespace TransportCompany.Domain.Models;
+﻿using TransportCompany.Domain.Shared.Enums;
+
+namespace TransportCompany.Domain.Models;
 
 /// <summary>
 /// Клиент транспортной компании — ФИО или название организации
@@ -19,4 +21,9 @@ public class Client
     /// Контактный телефон
     /// </summary>
     public required string Phone { get; set; }
+
+    /// <summary>
+    /// Тип клиента
+    /// </summary>
+    public ClientType Type { get; set; }
 }
