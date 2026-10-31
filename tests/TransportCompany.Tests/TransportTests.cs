@@ -1,30 +1,38 @@
 ﻿using TransportCompany.Domain.Data;
+using TransportCompany.Domain.Models;
+using TransportCompany.Domain.Shared.Enums;
 
 namespace TransportCompany.Tests;
 
-public class TransportTests
+public class TransportTests : IClassFixture<TransportTestData>
 {
+    private readonly TransportTestData _data;
+
+    public TransportTests(TransportTestData data)
+    {
+        _data = data;
+    }
+
     /// <summary>
     /// 1. Вывести информацию обо всех клиентах, заказывавших перевозку
     /// на транспорте указанной модели, упорядочить по ФИО
     /// </summary>
     [Theory]
-    [InlineData(1, new[] { "ИП Иванов И.И.", "ООО «МебельГрад»", "ООО «Ромашка»"})] //тент 10.5
-    [InlineData(2, new[] { "ООО «Василёк»" })] // тент 60
-    [InlineData(3, new[] { "АО «ТехноСервис»", "ИП Сидоров С.С.", "ООО «МебельГрад»" })] //реф 80
-    [InlineData(9, new[] { "ИП Иванов И.И.", "ООО «Ромашка»" })] // цистерна 55
-    [InlineData(999, new string[0])]
-    public void GetClientsByVehicleModel(int targetModelId, string[] expected)
+    [InlineData(1, new[] { 10 })]
+    [InlineData(2, new[] { 3, 2, 1 })]
+    [InlineData(3, new[] { 10, 9, 4 })]
+    [InlineData(7, new[] { 7, 5, 9 })]
+    [InlineData(99, new int[0])]
+    public void GetClientsByVehicleModel(int targetModelId, int[] expectedClientIds)
     {
-        var result = TransportTestData.Trips
+        var clients = _data.Trips
             .Where(trip => trip.Vehicle.Model.Id == targetModelId)
             .Select(trip => trip.Client)
             .DistinctBy(client => client.Id)
             .OrderBy(client => client.Name, StringComparer.Ordinal)
-            .Select(client => client.Name)
             .ToArray();
 
-        Assert.Equal(expected, result);
+        Assert.Equal(expectedClientIds, clients.Select(client => client.Id));
     }
 
     /// <summary>
@@ -33,22 +41,16 @@ public class TransportTests
     [Fact]
     public void GetVehiclesOnTrip()
     {
-        var expectedPlates = new[]
-        {
-            "А001АА 77",
-            "М001ММ 77",
-            "С001СС 77"
-        };
+        var expectedVehicleIds = new[] { 1, 4, 7 };
 
-        var result = TransportTestData.Trips
+        var vehicles = _data.Trips
             .Where(trip => trip.IsActive)
             .Select(trip => trip.Vehicle)
             .DistinctBy(vehicle => vehicle.Id)
-            .OrderBy(vehicle => vehicle.LicensePlate, StringComparer.Ordinal)
-            .Select(vehicle => vehicle.LicensePlate)
+            .OrderBy(vehicle => vehicle.Id)
             .ToArray();
 
-        Assert.Equal(expectedPlates, result);
+        Assert.Equal(expectedVehicleIds, vehicles.Select(vehicle => vehicle.Id));
     }
 
     /// <summary>
@@ -57,23 +59,21 @@ public class TransportTests
     [Fact]
     public void GetTop5DriversByTripCount()
     {
-        var expected = new[]
+        var expected = new (int DriverId, int TripCount)[]
         {
-            (PassportNumber: "4501 123456", TripCount: 5),
-            (PassportNumber: "4502 234567", TripCount: 4),
-            (PassportNumber: "4503 345678", TripCount: 3),
-            (PassportNumber: "4504 456789", TripCount: 2),
-            (PassportNumber: "4505 567890", TripCount: 1)
+            (1, 5),
+            (2, 4),
+            (3, 3),
+            (4, 3),
+            (5, 2)
         };
 
-        var result = TransportTestData.Trips
-            .GroupBy(trip => trip.Driver)
-            .OrderByDescending(group => group.Count())
-            .ThenBy(group => group.Key.PassportNumber, StringComparer.Ordinal)
+        var result = _data.Trips
+            .GroupBy(trip => trip.Driver.Id)
+            .Select(group => (DriverId: group.Key, TripCount: group.Count()))
+            .OrderByDescending(x => x.TripCount)
+            .ThenBy(x => x.DriverId)
             .Take(5)
-            .Select(group => (
-                PassportNumber: group.Key.PassportNumber,
-                TripCount: group.Count()))
             .ToArray();
 
         Assert.Equal(expected, result);
@@ -82,30 +82,25 @@ public class TransportTests
     /// <summary>
     /// 4. Для каждого транспортного средства вывести число рейсов
     /// </summary>
-    [Theory]
-    [InlineData("А001АА 77", 1)]
-    [InlineData("А002АА 77", 1)]
-    [InlineData("В001ВВ 77", 1)]
-    [InlineData("С001СС 77", 3)]
-    [InlineData("Е001ЕЕ 77", 1)]
-    [InlineData("К001КК 77", 1)]
-    [InlineData("М001ММ 77", 1)]
-    [InlineData("Н001НН 77", 1)]
-    [InlineData("О001ОО 77", 1)]
-    [InlineData("Р001РР 77", 2)]
-    [InlineData("Т001ТТ 77", 1)]
-    [InlineData("У001УУ 77", 1)]
-    public void GetTripCountForEachVehicle(string licensePlate, int expectedTripCount)
+    [Fact]
+    public void GetTripCountForEachVehicle()
     {
-        var tripCounts = TransportTestData.Trips
-            .GroupBy(trip => trip.Vehicle.LicensePlate)
-            .ToDictionary(
-                group => group.Key,
-                group => group.Count());
+        var expected = new (int VehicleId, int TripCount)[]
+        {
+            (1, 1), (2, 0), (3, 3), (4, 4), (5, 2), (6, 2),
+            (7, 2), (8, 3), (9, 1), (10, 2), (11, 2), (12, 0)
+        };
 
-        var actualTripCount = tripCounts.GetValueOrDefault(licensePlate);
+        var result = _data.Vehicles
+            .GroupJoin(
+                _data.Trips,
+                vehicle => vehicle.Id,
+                trip => trip.Vehicle.Id,
+                (vehicle, trips) => (VehicleId: vehicle.Id, TripCount: trips.Count()))
+            .OrderBy(x => x.VehicleId)
+            .ToArray();
 
-        Assert.Equal(expectedTripCount, actualTripCount);
+        Assert.Equal(expected, result);
     }
 
     /// <summary>
@@ -114,29 +109,61 @@ public class TransportTests
     [Fact]
     public void GetTop5ClientsByTotalCost()
     {
-        var expected = new (string Name, decimal TotalCost)[]
+        var expected = new (int ClientId, decimal TotalCost)[]
         {
-            ("ООО «Ромашка»",       300_000m),
-            ("ИП Сидоров С.С.",     250_000m),
-            ("ИП Петров П.П.",      180_000m),
-            ("АО «ТехноСервис»",    150_000m),
-            ("ИП Иванов И.И.",      135_000m)
+            (1, 325_000m),
+            (9, 262_000m),
+            (4, 190_000m),
+            (6, 180_000m),
+            (2, 153_000m)
         };
 
-        var result = TransportTestData.Trips
-            .GroupBy(trip => trip.Client)
-            .Select(group => new
-            {
-                Client = group.Key,
-                TotalCost = group.Sum(trip => trip.Cost)
-            })
+        var result = _data.Trips
+            .GroupBy(trip => trip.Client.Id)
+            .Select(group => (ClientId: group.Key, TotalCost: group.Sum(trip => trip.Cost)))
             .OrderByDescending(x => x.TotalCost)
+            .ThenBy(x => x.ClientId)
             .Take(5)
-            .Select(x => (
-                Name: x.Client.Name,
-                TotalCost: x.TotalCost))
             .ToArray();
 
         Assert.Equal(expected, result);
+    }
+
+    /// <summary>
+    /// Проверка корректности формирования отображаемого имени клиента
+    /// </summary>
+    [Theory]
+    [InlineData(ClientType.LegalPerson, "Ромашка", "ООО", "ООО «Ромашка»")]
+    [InlineData(ClientType.LegalPerson, "ТехноСервис", "АО", "АО «ТехноСервис»")]
+    [InlineData(ClientType.IndividualEntrepreneur, "Иванов И.И.", null, "ИП Иванов И.И.")]
+    [InlineData(ClientType.PhysicalPerson, "Алексеев А.А.", null, "Алексеев А.А.")]
+    public void ClientDisplayName_FormattedCorrectly(
+        ClientType type, string name, string? legalForm, string expectedDisplayName)
+    {
+        var client = new Client
+        {
+            Id = 999,
+            Name = name,
+            Phone = "+7 000 000-00-00",
+            Type = type,
+            LegalForm = legalForm
+        };
+
+        Assert.Equal(expectedDisplayName, client.DisplayName);
+    }
+
+    /// <summary>
+    /// Проверка категории водительских прав водителя
+    ///  на соответствие категории управляемого автомобиля
+    /// </summary>
+    [Fact]
+    public void AllTrips_DriverHasRequiredLicenseCategory()
+    {
+        var invalidAssignments = _data.Trips
+            .Where(trip => trip.Driver.LicenseCategory != trip.Vehicle.Model.RequiredLicenseCategory)
+            .Select(trip => new { trip.Id, Driver = trip.Driver.LastName, Vehicle = trip.Vehicle.Model.Name })
+            .ToArray();
+
+        Assert.Empty(invalidAssignments);
     }
 }

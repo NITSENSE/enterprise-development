@@ -26,4 +26,19 @@ public class Client
     /// Тип клиента
     /// </summary>
     public ClientType Type { get; set; }
+
+    /// <summary>
+    /// Форма Юр.лица
+    /// </summary>
+    public string? LegalForm { get; set; }
+
+    /// <summary>
+    ///Полное наименование для вывода
+    /// </summary>
+    public string DisplayName => Type switch
+    {
+        ClientType.LegalPerson => $"{LegalForm ?? "ООО"} «{Name}»",
+        ClientType.IndividualEntrepreneur => $"ИП {Name}",
+        _ => Name
+    };
 }
