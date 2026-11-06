@@ -19,9 +19,9 @@ public class TransportTests : IClassFixture<TransportTestData>
     /// </summary>
     [Theory]
     [InlineData(1, new[] { 10 })]
-    [InlineData(2, new[] { 3, 2, 1 })]
-    [InlineData(3, new[] { 10, 9, 4 })]
-    [InlineData(7, new[] { 7, 5, 9 })]
+    [InlineData(2, new[] { 2, 3, 1 })]
+    [InlineData(3, new[] { 9, 4, 10 })]
+    [InlineData(7, new[] { 7, 9, 5 })]
     [InlineData(99, new int[0])]
     public void GetClientsByVehicleModel(int targetModelId, int[] expectedClientIds)
     {
@@ -29,7 +29,8 @@ public class TransportTests : IClassFixture<TransportTestData>
             .Where(trip => trip.Vehicle.Model.Id == targetModelId)
             .Select(trip => trip.Client)
             .DistinctBy(client => client.Id)
-            .OrderBy(client => client.Name, StringComparer.Ordinal)
+            .OrderBy(client => client.Type)
+            .ThenBy(client => client.DisplayName)
             .ToArray();
 
         Assert.Equal(expectedClientIds, clients.Select(client => client.Id));

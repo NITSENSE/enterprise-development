@@ -16,8 +16,8 @@ public enum ClientType
     IndividualEntrepreneur = 1,
 
     /// <summary>
-    /// Юридическое лицо(ООО, АО и др.)
+    /// Юридическое лицо (ООО, АО и др.)
     /// </summary>
-    LegalPerson = 2,
+    LegalPerson = 2
 
 }

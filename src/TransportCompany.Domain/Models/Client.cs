@@ -33,7 +33,7 @@ public class Client
     public string? LegalForm { get; set; }
 
     /// <summary>
-    ///Полное наименование для вывода
+    /// Полное наименование для вывода
     /// </summary>
     public string DisplayName => Type switch
     {
